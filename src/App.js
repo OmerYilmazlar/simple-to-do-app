@@ -1,23 +1,70 @@
-import logo from './logo.svg';
-import './App.css';
+import "./App.css";
+import React from "react";
+import { useState } from "react";
+import { useEffect } from "react";
+import Form from "./Form.js";
+import ToDoList from "./ToDoList.js";
 
-function App() {
+const App = () => {
+  const [input, setInput] = useState('');
+  const [ToDoList, setToDoList] = useState([]);
+  const [status, setStatus] = useState("all");
+  const [filteredToDos, setFilteredToDos] = useState([]);
+
+  useEffect(()=>{
+    getLocalToDos();
+  }, []);
+
+  useEffect(() => {
+    saveLocalToDos();
+    handleFilters();
+  }, [ToDoList, status]);
+
+  const handleFilters = () => {
+    switch (status) {
+      case "completed":
+        setFilteredToDos(ToDoList.filter((todo) => todo.completed === true));
+        break;
+      case "uncompleted":
+        setFilteredToDos(ToDoList.filter((todo) => todo.completed === false));
+        break;
+      default:
+        setFilteredToDos(ToDoList);
+        break;
+    }
+  };
+
+  const saveLocalToDos = () =>{
+    localStorage.setItem("ToDoList", JSON.stringify(ToDoList))
+  }
+
+  const getLocalToDos = () => {
+    if(localStorage.getItem('ToDoList') === null) {
+      localStorage.setItem("ToDoList", JSON.stringify([]))
+    }
+    else {
+      let toDoLocal = JSON.parse(localStorage.getItem('ToDoList'))
+      setToDoList(toDoLocal);
+    }
+  }
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+      <header>
+        <h1>React to do list App</h1>
       </header>
+      <Form
+        ToDoList={ToDoList}
+        setToDoList={setToDoList}
+        setInput={setInput}
+        input={input}
+        setStatus={setStatus}
+      />
+      <ToDoList
+        ToDoList={ToDoList}
+        setToDoList={setToDoList}
+        filteredToDos={filteredToDos}
+      />
     </div>
   );
 }
